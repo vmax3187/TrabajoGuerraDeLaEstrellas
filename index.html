@@ -1,0 +1,233 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="Base de la Alianza Rebelde - Sistema de gestión de naves, pilotos y misiones" />
+  <title>Base de la Alianza Rebelde</title>
+  <link rel="stylesheet" href="css/styles.css" />
+</head>
+<body>
+
+  <!-- HEADER / NAV -->
+  <header>
+    <nav class="navbar" role="navigation" aria-label="Navegación principal">
+  <div class="nav-brand">
+    <span class="brand-icon" aria-hidden="true"><img id="imagen_logo" src="imagenes/Alliance_Starbird.svg" alt=""></span>
+    <span class="brand-title">Alianza Rebelde</span>
+  </div>
+  <ul class="nav-links" role="list">
+    <li><button class="nav-btn active" data-section="hangar" aria-current="page"> Hangar</button></li>
+    <li><button class="nav-btn" data-section="pilotos"> Pilotos</button></li>
+    <li><button class="nav-btn" data-section="misiones"> Misiones</button></li>
+    <li><button class="nav-btn" data-section="dashboard"> Mando</button></li>
+  </ul>
+  
+  <!-- Botón de tema -->
+  <button id="theme-toggle" class="theme-toggle" aria-label="Cambiar a modo claro" title="Cambiar tema">☀️</button>
+</nav>
+  </header>
+
+  <main id="main-content">
+
+    <!-- SECCIÓN 1: HANGAR -->
+    <section id="hangar" class="section active" aria-labelledby="hangar-title">
+      <h1 id="hangar-title">Hangar de Naves</h1>
+
+      <div class="hangar-controls" role="search" aria-label="Controles del hangar">
+        <input
+          type="search"
+          id="buscador-naves"
+          placeholder="Buscar nave..."
+          aria-label="Buscar nave por nombre"
+          autocomplete="off"
+        />
+        <select id="filtro-tipo" aria-label="Filtrar por tipo de nave">
+          <option value="">Todos los tipos</option>
+          <option value="caza">Caza</option>
+          <option value="transporte">Transporte</option>
+          <option value="fragata">Fragata</option>
+          <option value="carguero">Carguero</option>
+          <option value="bombardero">Bombardero</option>
+        </select>
+        <button id="btn-ordenar" aria-label="Ordenar por velocidad" aria-pressed="false">
+          ↑↓ Velocidad
+        </button>
+        <span id="contador-naves" class="contador" role="status" aria-live="polite">0 naves</span>
+      </div>
+
+      <div id="grid-naves" class="grid-naves" role="list" aria-label="Lista de naves"></div>
+
+      <!-- MODAL DETALLE NAVE -->
+      <div id="modal-nave" class="modal" role="dialog" aria-modal="true" aria-labelledby="modal-nave-titulo" hidden>
+        <div class="modal-content">
+          <button class="modal-close" id="modal-close-btn" aria-label="Cerrar detalle de nave">&times;</button>
+          <div id="modal-nave-body"></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- SECCIÓN 2: PILOTOS -->
+    <section id="pilotos" class="section" aria-labelledby="pilotos-title">
+      <h1 id="pilotos-title">Registro de Pilotos</h1>
+
+      <div class="pilotos-layout">
+        <!-- Formulario -->
+        <div class="form-card" role="region" aria-labelledby="form-piloto-title">
+          <h2 id="form-piloto-title">Añadir / Editar Piloto</h2>
+          <div class="form-group">
+            <label for="piloto-nombre">Nombre <span aria-hidden="true">*</span></label>
+            <input type="text" id="piloto-nombre" required aria-required="true" autocomplete="off" />
+          </div>
+          <div class="form-group">
+            <label for="piloto-rango">Rango <span aria-hidden="true">*</span></label>
+            <select id="piloto-rango" required aria-required="true">
+              <option value="">Selecciona rango</option>
+              <option value="Comandante">Comandante</option>
+              <option value="Capitán">Capitán</option>
+              <option value="Teniente">Teniente</option>
+              <option value="Soldado">Soldado</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label for="piloto-nave">Nave asignada <span aria-hidden="true">*</span></label>
+            <select id="piloto-nave" required aria-required="true">
+              <option value="">Selecciona nave</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label for="piloto-victorias">Victorias en combate <span aria-hidden="true">*</span></label>
+            <input type="number" id="piloto-victorias" min="0" required aria-required="true" />
+          </div>
+          <div class="form-group">
+            <label for="piloto-estado">Estado <span aria-hidden="true">*</span></label>
+            <select id="piloto-estado" required aria-required="true">
+              <option value="">Selecciona estado</option>
+              <option value="activo">Activo</option>
+              <option value="herido">Herido</option>
+              <option value="KIA">KIA</option>
+            </select>
+          </div>
+          <div id="form-error" class="form-error" role="alert" aria-live="assertive" hidden></div>
+          <div class="form-buttons">
+            <button id="btn-guardar-piloto" class="btn-primary">💾 Guardar</button>
+            <button id="btn-cancelar-piloto" class="btn-secondary">✖ Cancelar</button>
+          </div>
+          <input type="hidden" id="piloto-id" />
+        </div>
+
+        <!-- Tabla de pilotos -->
+        <div class="tabla-wrapper" role="region" aria-labelledby="lista-pilotos-title">
+          <h2 id="lista-pilotos-title">Pilotos registrados</h2>
+          <div id="lista-pilotos" role="list" aria-label="Lista de pilotos"></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- SECCIÓN 3: MISIONES (KANBAN) -->
+    <section id="misiones" class="section" aria-labelledby="misiones-title">
+      <h1 id="misiones-title">Panel de Misiones</h1>
+
+      <!-- Formulario nueva misión -->
+      <details class="form-misiones-wrapper">
+        <summary>➕ Nueva misión</summary>
+        <div class="form-card" role="region" aria-labelledby="form-mision-title">
+          <h2 id="form-mision-title" class="sr-only">Formulario de misión</h2>
+          <div class="form-grid">
+            <div class="form-group">
+              <label for="mision-nombre">Nombre <span aria-hidden="true">*</span></label>
+              <input type="text" id="mision-nombre" required aria-required="true" autocomplete="off" />
+            </div>
+            <div class="form-group">
+              <label for="mision-descripcion">Descripción <span aria-hidden="true">*</span></label>
+              <input type="text" id="mision-descripcion" required aria-required="true" autocomplete="off" />
+            </div>
+            <div class="form-group">
+              <label for="mision-piloto">Piloto asignado</label>
+              <select id="mision-piloto" aria-label="Piloto asignado">
+                <option value="">Sin piloto</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label for="mision-dificultad">Dificultad <span aria-hidden="true">*</span></label>
+              <select id="mision-dificultad" required aria-required="true">
+                <option value="">Selecciona dificultad</option>
+                <option value="fácil">Fácil</option>
+                <option value="media">Media</option>
+                <option value="difícil">Difícil</option>
+                <option value="suicida">Suicida</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label for="mision-fecha">Fecha de inicio <span aria-hidden="true">*</span></label>
+              <input type="date" id="mision-fecha" required aria-required="true" />
+            </div>
+          </div>
+          <div id="form-mision-error" class="form-error" role="alert" aria-live="assertive" hidden></div>
+          <button id="btn-guardar-mision" class="btn-primary">💾 Crear misión</button>
+        </div>
+      </details>
+
+      <!-- Filtro dificultad -->
+      <div class="misiones-filtro">
+        <label for="filtro-dificultad">Filtrar por dificultad:</label>
+        <select id="filtro-dificultad" aria-label="Filtrar misiones por dificultad">
+          <option value="">Todas</option>
+          <option value="fácil">Fácil</option>
+          <option value="media">Media</option>
+          <option value="difícil">Difícil</option>
+          <option value="suicida">Suicida</option>
+        </select>
+      </div>
+
+      <!-- Tablero Kanban -->
+      <div class="kanban" role="region" aria-label="Tablero Kanban de misiones">
+        <div class="kanban-col" id="col-pendiente" aria-label="Columna Pendiente"
+             data-col="pendiente" ondragover="event.preventDefault()" ondrop="handleDrop(event, 'pendiente')">
+          <h2 class="kanban-col-title">
+            <span>⏳ Pendiente</span>
+            <span class="col-count" id="count-pendiente" aria-label="Número de misiones pendientes">0</span>
+          </h2>
+          <div class="kanban-cards" id="cards-pendiente" role="list"></div>
+        </div>
+        <div class="kanban-col" id="col-en-curso" aria-label="Columna En curso"
+             data-col="en-curso" ondragover="event.preventDefault()" ondrop="handleDrop(event, 'en-curso')">
+          <h2 class="kanban-col-title">
+            <span>🚀 En curso</span>
+            <span class="col-count" id="count-en-curso" aria-label="Número de misiones en curso">0</span>
+          </h2>
+          <div class="kanban-cards" id="cards-en-curso" role="list"></div>
+        </div>
+        <div class="kanban-col" id="col-completada" aria-label="Columna Completada"
+             data-col="completada" ondragover="event.preventDefault()" ondrop="handleDrop(event, 'completada')">
+          <h2 class="kanban-col-title">
+            <span>✅ Completada</span>
+            <span class="col-count" id="count-completada" aria-label="Número de misiones completadas">0</span>
+          </h2>
+          <div class="kanban-cards" id="cards-completada" role="list"></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- SECCIÓN 4: DASHBOARD -->
+ <section id="dashboard" class="section" aria-labelledby="dashboard-title">
+  <h1 id="dashboard-title">Mando de la Alianza</h1>
+  
+  <!-- Botones de exportación -->
+  <div class="dashboard-actions" style="margin-bottom: 2rem; display: flex; gap: 1rem;">
+    <button id="btn-exportar-json" class="btn-primary">📥 Exportar datos (JSON)</button>
+  </div>
+
+  <div id="dashboard-content" role="region" aria-label="Estadísticas generales"></div>
+</section>
+
+  </main>
+
+  <footer>
+    <p>Que la Fuerza del DOM te acompañe </p>
+  </footer>
+
+  <!-- JS -->
+  <script src="js/main.js"></script>
+</body>
+</html>
